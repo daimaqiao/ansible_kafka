@@ -1,0 +1,203 @@
+--- # kafka.yml
+- name: initialize {{remote_local}}
+  file: path={{remote_local}} state=directory
+  tags: kafka
+
+# user & group
+- name: set group {{kafka_group}}
+  group: name={{kafka_group}} system=yes
+  tags: kafka
+- name: set user {{kafka_user}}
+  user: name={{kafka_user}} group={{kafka_group}} system=yes
+  tags: kafka
+
+# package
+- name: downloading from {{kafka_dlurl}}
+  unarchive: src={{kafka_dlurl}} dest={{remote_local}} creates={{kafka_checkme}} owner={{kafka_user}} group={{kafka_group}} remote_src=yes
+  when: remote_dl
+  tags: kafka
+- name: unarchive {{kafka_pkgname}}
+  unarchive: src={{kafka_archive}} dest={{remote_local}} creates={{kafka_checkme}} owner={{kafka_user}} group={{kafka_group}} remote_src=no
+  when: not remote_dl
+  tags: kafka
+
+# reclaim
+- name: check kafka_reclaim
+  debug:
+    msg: " *** WARN *** The 'kafka_reclain' has come into force!"
+  when: kafka_reclaim
+  tags: kafka
+- name: remove logs {{kafka_logs}}
+  file: path={{kafka_logs}} state=absent owner={{kafka_user}} group={{kafka_group}}
+  when: kafka_reclaim
+  tags: kafka
+- name: remove datadir {{kafka_datadir}}
+  file: path={{kafka_datadir}} state=absent owner={{kafka_user}} group={{kafka_group}}
+  when: kafka_reclaim
+  tags: kafka
+- name: remove logdir {{kafka_logdir}}
+  file: path={{kafka_logdir}} state=absent owner={{kafka_user}} group={{kafka_group}}
+  when: kafka_reclaim
+  tags: kafka
+- name: remove log4jdir {{kafka_log4jdir}}
+  file: path={{kafka_log4jdir}} state=absent owner={{kafka_user}} group={{kafka_group}}
+  when: kafka_reclaim
+  tags: kafka
+
+# working dirs
+- name: setup logs {{kafka_logs}}
+  file: path={{kafka_logs}} state=directory owner={{kafka_user}} group={{kafka_group}}
+  tags: kafka
+- name: setup datadir {{kafka_datadir}}
+  file: path={{kafka_datadir}} state=directory owner={{kafka_user}} group={{kafka_group}}
+  tags: kafka
+- name: setup logdir {{kafka_logdir}}
+  file: path={{kafka_logdir}} state=directory owner={{kafka_user}} group={{kafka_group}}
+  tags: kafka
+- name: setup log4jdir {{kafka_log4jdir}}
+  file: path={{kafka_log4jdir}} state=directory owner={{kafka_user}} group={{kafka_group}}
+  tags: kafka
+
+# configurations
+- name: backup {{kafka_server_dest}}
+  command: mv {{kafka_server_dest}} {{kafka_server_dest}}.backup creates={{kafka_server_dest}}.backup
+  tags: kafka
+- name: update {{kafka_server_dest}}
+  template: src={{kafka_server_src}} dest={{kafka_server_dest}}
+  tags: kafka
+  notify:
+  - restart kafka
+
+- name: backup {{kafka_log4j_dest}}
+  command: mv {{kafka_log4j_dest}} {{kafka_log4j_dest}}.backup creates={{kafka_log4j_dest}}.backup
+  tags: kafka
+- name: update {{kafka_log4j_dest}}
+  template: src={{kafka_log4j_src}} dest={{kafka_log4j_dest}}
+  tags: kafka
+  notify:
+  - restart kafka
+
+# kafka.service
+- name: check {{kafka_systemd_dest}}
+  stat: path=/etc/systemd/system/
+  register: systemd
+  tags: kafka
+- name: update {{kafka_systemd_dest}}
+  template: src={{kafka_systemd_src}} dest={{kafka_systemd_dest}}
+  when: systemd.stat.exists
+  tags: kafka
+  notify:
+  - restart kafka
+- name: daemon-reload
+  command: systemctl daemon-reload
+  when: systemd.stat.exists
+  tags: kafka
+
+# other scripts
+- name: update {{kafka_be_consumer_dest}}
+  template: src={{kafka_be_consumer_src}} dest={{kafka_be_consumer_dest}} mode=755
+  tags: kafka
+- name: update {{kafka_be_producer_dest}}
+  template: src={{kafka_be_producer_src}} dest={{kafka_be_producer_dest}} mode=755
+  tags: kafka
+- name: update {{kafka_create_topic_dest}}
+  template: src={{kafka_create_topic_src}} dest={{kafka_create_topic_dest}} mode=755
+  tags: kafka
+- name: update {{kafka_delete_topic_dest}}
+  template: src={{kafka_delete_topic_src}} dest={{kafka_delete_topic_dest}} mode=755
+  tags: kafka
+- name: update {{kafka_show_topics_dest}}
+  template: src={{kafka_show_topics_src}} dest={{kafka_show_topics_dest}} mode=755
+  tags: kafka
+
+
+# ============================================
+# kafka_zk when kafka_zk_enable is true
+- name: setup zk_datadir {{kafka_zk_datadir}}
+  file: path={{kafka_zk_datadir}} state=directory owner={{kafka_user}} group={{kafka_group}}
+  when: kafka_zk_enable
+  tags: kafka_zk
+- name: setup zk_logdir {{kafka_zk_logdir}}
+  file: path={{kafka_zk_logdir}} state=directory owner={{kafka_user}} group={{kafka_group}}
+  when: kafka_zk_enable
+  tags: kafka_zk
+
+# kafka_zk when kafka_zk_enable is true
+- name: backup {{kafka_zk_dest}}
+  command: mv {{kafka_zk_dest}} {{kafka_zk_dest}}.backup creates={{kafka_zk_dest}}.backup
+  when: kafka_zk_enable
+  tags: kafka_zk
+- name: update {{kafka_zk_dest}}
+  template: src={{kafka_zk_src}} dest={{kafka_zk_dest}}
+  when: kafka_zk_enable
+  tags: kafka_zk
+  notify:
+  - restart kafka_zk
+
+# kafka_zk.service when kafka_zk_enable is true
+- name: update {{kafka_zk_systemd_dest}}
+  template: src={{kafka_zk_systemd_src}} dest={{kafka_zk_systemd_dest}}
+  when:
+  - kafka_zk_enable
+  - systemd.stat.exists
+  tags: kafka_zk
+  notify:
+  - restart kafka_zk
+- name: daemon-reload
+  command: systemctl daemon-reload
+  when:
+  - kafka_zk_enable
+  - systemd.stat.exists
+  tags: kafka_zk
+
+# start kafka_zk.service when kafka_zk_enable is true
+- name: check {{kafka_zk_systemd_dest}}
+  stat: path={{kafka_zk_systemd_dest}}
+  when: kafka_zk_enable
+  register: kafka_zk_systemd
+  tags: kafka_zk
+- name: start {{kafka_zk_systemd_dest}}
+  service: name=kafka_zk state=started enabled=yes
+  register: kafka_zk_started
+  when:
+  - kafka_zk_enable
+  - kafka_zk_systemd.stat.exists
+  tags: kafka_zk
+
+- name: check kafka_zk
+  wait_for:
+    port: "{{kafka_zk_port}}"
+    delay: 5
+    timeout: 45
+  when:
+  - kafka_zk_enable
+  - kafka_zk_systemd.stat.exists
+  - kafka_zk_started.changed
+  - kafka_zk_started.state == "started"
+  tags: kafka_zk
+#
+# ============================================
+
+
+# start kafka.service
+- name: check {{kafka_systemd_dest}}
+  stat: path={{kafka_systemd_dest}}
+  register: kafka_systemd
+  tags: kafka
+- name: start {{kafka_systemd_dest}}
+  service: name=kafka state=started enabled=yes
+  register: kafka_started
+  when: kafka_systemd.stat.exists
+  tags: kafka
+
+- name: check kafka
+  wait_for:
+    port: "{{kafka_port}}"
+    delay: 5
+    timeout: 45
+  when:
+  - kafka_systemd.stat.exists
+  - kafka_started.changed
+  - kafka_started.state == "started"
+  tags: kafka
+

@@ -1,0 +1,16 @@
+#!/bin/sh
+{% if kafka_host and kafka_port -%}
+	SERVER="{{kafka_host}}:{{kafka_port}}"
+{% elif kafka_host -%}
+	SERVER="{{kafka_host}}:9092"
+{% else -%}
+	SERVER="localhost:{{kafka_port}}"
+{% endif %}
+
+if [ $# -eq 0 ]; then
+	echo "USAGE: $0 <topic>"
+	exit 0
+fi
+
+bin/kafka-console-producer.sh --broker-list $SERVER --topic $1
+

@@ -1,0 +1,20 @@
+#!/bin/sh
+{% if kafka_host and kafka_port -%}
+	SERVER="{{kafka_host}}:{{kafka_port}}"
+{% elif kafka_host -%}
+	SERVER="{{kafka_host}}:9092"
+{% else -%}
+	SERVER="localhost:{{kafka_port}}"
+{% endif %}
+
+if [ $# -eq 0 ]; then
+	echo "USAGE: $0 <topic>"
+	exit 0
+fi
+
+if [ "$2" = "beginning" ]; then
+	bin/kafka-console-consumer.sh --bootstrap-server $SERVER --from-beginning --topic $1
+else
+	bin/kafka-console-consumer.sh --bootstrap-server $SERVER --topic $1
+fi
+

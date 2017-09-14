@@ -1,0 +1,14 @@
+#!/bin/sh
+{% if kafka_zk -%}
+	ZOO="{{kafka_zk}}"
+{% else -%}
+	ZOO="localhost:2181"
+{% endif %}
+
+if [ $# -eq 0 ]; then
+	echo "USAGE: $0 <topic> [<partions>=1] [<replication-factor>=1]"
+	exit 0
+fi
+
+bin/kafka-topics.sh --zookeeper $ZOO --create --topic $1 --partitions ${2:-1} --replication-factor ${3:-1}
+

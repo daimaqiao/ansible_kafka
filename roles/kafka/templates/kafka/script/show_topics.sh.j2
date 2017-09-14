@@ -1,0 +1,14 @@
+#!/bin/sh
+{% if kafka_zk -%}
+	ZOO="{{kafka_zk}}"
+{% else -%}
+	ZOO="localhost:2181"
+{% endif %}
+
+bin/kafka-topics.sh --zookeeper $ZOO --list
+
+if [ $# -gt 0 ]; then
+	echo " ***** describe topic: $1"
+	bin/kafka-topics.sh --zookeeper $ZOO --describe --topic $1
+fi
+

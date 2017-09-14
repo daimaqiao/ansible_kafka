@@ -1,0 +1,26 @@
+--- # scala.yml
+- name: initialize {{remote_local}}
+  file: path={{remote_local}} state=directory
+  tags: scala
+
+- name: downloading from {{scala_dlurl}}
+  unarchive: src={{scala_dlurl}} dest={{remote_local}} creates={{scala_checkme}} owner={{scala_user}} group={{scala_group}} remote_src=yes
+  tags: scala
+  when: remote_dl
+- name: unarchive {{scala_pkgname}}
+  unarchive: src={{scala_archive}} dest={{remote_local}} creates={{scala_checkme}} owner=root group=root remote_src=no
+  tags: scala
+  when: not remote_dl
+
+- name: generate {{scala_profile_dest}}
+  template: src={{scala_profile_src}} dest={{scala_profile_dest}}
+  tags: scala
+
+- name: generate {{scala_profile_link}}
+  file: path={{scala_profile_link}} src={{scala_profile_dest}} state=link
+  tags: scala
+
+- name: generate {{scala_link}}
+  file: path={{scala_link}} src={{scala_main}} state=link
+  tags: scala
+

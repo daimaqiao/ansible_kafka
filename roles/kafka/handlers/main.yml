@@ -1,0 +1,11 @@
+---
+- name: restart kafka_zk
+  service: name=kafka_zk state=restarted
+  when: kafka_zk_enable and (not kafka_zk_started.changed)
+  tags: kafka_zk
+
+- name: restart kafka
+  service: name=kafka state=restarted
+  when: not kafka_started.changed
+  tags: kafka
+

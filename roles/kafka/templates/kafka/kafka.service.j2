@@ -1,0 +1,24 @@
+[Unit]
+Description=kafka
+{% if kafka_zk_enable %}
+#After=network.target kafka_zk.service
+{% else %}
+#After=network.target
+{% endif %}
+
+[Service]
+WorkingDirectory={{kafka_home}}
+User=kafka
+Group=kafka
+ExecStart={{kafka_start}}
+
+TimeoutSec=50
+
+Restart=always
+RestartSec=30
+StartLimitInterval=30
+StartLimitBurst=1
+
+[Install]
+WantedBy=multi-user.target
+

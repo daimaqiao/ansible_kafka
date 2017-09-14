@@ -1,0 +1,100 @@
+---
+remote_local: /opt/local
+local_pkg:    package
+remote_dl:    true
+
+# scala
+scala_version:  2.11.11
+scala_name:     "scala-{{scala_version}}"
+scala_pkgname:  "{{scala_name}}.tgz"
+scala_dlurl:    "http://downloads.lightbend.com/scala/{{scala_version}}/{{scala_pkgname}}"
+scala_user:     root
+scala_group:    root
+scala_home:     "{{remote_local}}/{{scala_name}}"
+scala_archive:  "{{local_pkg}}/{{scala_pkgname}}"
+scala_main:     "{{scala_home}}/bin/scala"
+scala_link:     /bin/scala
+scala_checkme:  "{{scala_main}}"
+# scala.profile
+scala_profile_src:  kafka/scala.profile.j2
+scala_profile_dest: "{{scala_home}}/.profile"
+scala_profile_link: /etc/profile.d/scala.sh
+##
+
+# kafka:
+kafka_scala:    2.11
+kafka_version:  0.10.2.1
+kafka_name:     "kafka_{{kafka_scala}}-{{kafka_version}}"
+kafka_pkgname:  "{{kafka_name}}.tgz"
+kafka_dlurl:    "http://mirrors.tuna.tsinghua.edu.cn/apache/kafka/{{kafka_version}}/{{kafka_pkgname}}"
+kafka_user:     kafka
+kafka_group:    kafka
+kafka_home:     "{{remote_local}}/{{kafka_name}}"
+kafka_archive:  "{{local_pkg}}/{{kafka_pkgname}}"
+kafka_checkme:  "{{kafka_home}}/bin/kafka-server-start.sh"
+kafka_start:    "{{kafka_home}}/bin/kafka-server-start.sh {{kafka_home}}/config/server.properties"
+kafka_logs:     "{{kafka_home}}/logs"
+kafka_datadir:  /var/lib/kafka
+kafka_logdir:   /var/log/kafka
+kafka_log4jdir: /var/log/kafka/logs
+# default kafka host&group variables, can be overrided
+kafka_id: 0 
+kafka_host: ""
+kafka_port: 9092
+kafka_zk: localhost:2181
+kafka_partitions: 1
+kafka_replication_factor: 1
+kafka_reclaim: false
+# server.properties
+kafka_server_src:   kafka/server.properties.j2
+kafka_server_dest:  "{{kafka_home}}/config/server.properties"
+kafka_server__id:                           "{{kafka_id}}"
+kafka_server__delete_topic_enable:          "true"
+kafka_server__log_dirs:                     "{{kafka_datadir}}"
+kafka_server__num_partitions:               "{{kafka_partitions}}"
+kafka_server__default_replication_factor:   "{{kafka_replication_factor}}"
+kafka_server__zookeeper_connect:            "{{kafka_zk}}"
+kafka_server__zookeeper_connection_timeout_ms: 12000
+kafka_server__log_flush_interval_messages:  10000
+kafka_server__log_flush_interval_ms:        10000
+kafka_server__log_retention_hours:          24
+kafka_server__log_retention_bytes:          1073741824  #1G
+kafka_server__log_segment_bytes:            524288000   #500M
+kafka_server__protocol_map:                 "LOCAL:PLAINTEXT" #extra mapping
+# kafka.service
+kafka_systemd_src:  kafka/kafka.service.j2
+kafka_systemd_dest: /etc/systemd/system/kafka.service
+# log4j.properties
+kafka_zk_port:          2181
+kafka_log4j_src:        kafka/log4j.properties.j2
+kafka_log4j_dest:       "{{kafka_home}}/config/log4j.properties"
+kafka_log4j__logdir:    "{{kafka_log4jdir}}"
+kafka_zk__clientPort:   "{{kafka_zk_port}}"
+# other scripts
+kafka_be_consumer_src:      kafka/script/be_consumer.sh.j2
+kafka_be_consumer_dest:     "{{kafka_home}}/be_consumer.sh"
+kafka_be_producer_src:      kafka/script/be_producer.sh.j2
+kafka_be_producer_dest:     "{{kafka_home}}/be_producer.sh"
+kafka_create_topic_src:     kafka/script/create_topic.sh.j2
+kafka_create_topic_dest:    "{{kafka_home}}/create_topic.sh"
+kafka_delete_topic_src:     kafka/script/delete_topic.sh.j2
+kafka_delete_topic_dest:    "{{kafka_home}}/delete_topic.sh"
+kafka_show_topics_src:      kafka/script/show_topics.sh.j2
+kafka_show_topics_dest:     "{{kafka_home}}/show_topics.sh"
+################################################################
+kafka_zk_enable: false # kafka_zk #
+################################################################
+# kafka_zk.service
+kafka_zk_home:         "{{kafka_home}}"
+kafka_zk_systemd_src:  kafka/kafka_zk.service.j2
+kafka_zk_systemd_dest: /etc/systemd/system/kafka_zk.service
+# zookeeper.properties
+kafka_zk_start:    "{{kafka_zk_home}}/bin/zookeeper-server-start.sh {{kafka_zk_home}}/config/zookeeper.properties"
+kafka_zk_datadir: /var/lib/kafka_zk
+kafka_zk_logdir:  /var/log/kafka_zk
+kafka_zk_src:     kafka/zookeeper.properties.j2
+kafka_zk_dest:    "{{kafka_home}}/config/zookeeper.properties"
+kafka_zk__dataDir:    "{{kafka_zk_datadir}}"
+kafka_zk__dataLogDir: "{{kafka_zk_logdir}}"
+##
+

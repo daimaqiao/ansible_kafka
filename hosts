@@ -1,0 +1,22 @@
+[kafka]
+# kafka_id:        {必选：不重复的数字}
+# kafka_zk:        {必选：zookeeper服务地址（IP:PORT/PATH），多个地址以逗号分隔}
+# kafka_port:      {可选：服务端口，默认9092}
+# kafka_host:      {可选：有效的本机IP}
+# kafka_reclaim:   {可选：首先清除已经存在的kafka数据，再安装kafka，通常用于重新安装kafka}
+# kafka_zk_enable: {可选：启用kafka内置的zookeeper，通常只用于测试}
+# kafka_partitions:         {可选：指定默认topic的partitions数量}
+# kafka_replication_factor: {可选：指定默认topic的replicas数量}
+# remote_dl:       {可选：默认从第三方服务器下载.tgz包，局域网内部为加快部署时，提前将.tgz包放到package目录，并配置remote_dl=false}
+
+
+192.168.56.241 kafka_id=241 kafka_zk_enable=true
+
+#192.168.56.241 kafka_id=241 kafka_port=9092 kafka_zk=192.168.56.241:2181 kafka_partitions=1 kafka_replication_factor=1
+#192.168.56.242 kafka_id=242 kafka_port=9092 kafka_zk=192.168.56.241:2181 kafka_partitions=1 kafka_replication_factor=1
+#192.168.56.243 kafka_id=243 kafka_port=9092 kafka_zk=192.168.56.241:2181 kafka_partitions=1 kafka_replication_factor=1
+
+[kafka:vars]
+ansible_user=abc
+#ansible_become_pass=no-password
+
