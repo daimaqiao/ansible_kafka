@@ -1,5 +1,8 @@
 ---
-remote_local: /opt/local
+remote_base:  ""
+remote_local: "{{remote_base}}/opt/local"
+remote_lib:   "{{remote_base}}/var/lib"
+remote_log:   "{{remote_base}}/var/log"
 local_pkg:    package
 remote_dl:    true
 
@@ -34,9 +37,9 @@ kafka_archive:  "{{local_pkg}}/{{kafka_pkgname}}"
 kafka_checkme:  "{{kafka_home}}/bin/kafka-server-start.sh"
 kafka_start:    "{{kafka_home}}/bin/kafka-server-start.sh {{kafka_home}}/config/server.properties"
 kafka_logs:     "{{kafka_home}}/logs"
-kafka_datadir:  /var/lib/kafka
-kafka_logdir:   /var/log/kafka
-kafka_log4jdir: /var/log/kafka/logs
+kafka_datadir:  "{{remote_lib}}/kafka"
+kafka_logdir:   "{{remote_log}}/kafka"
+kafka_log4jdir: "{{remote_log}}/kafka/logs"
 # default kafka host&group variables, can be overrided
 kafka_id: 0 
 kafka_host: ""
@@ -89,11 +92,11 @@ kafka_zk_home:         "{{kafka_home}}"
 kafka_zk_systemd_src:  kafka/kafka_zk.service.j2
 kafka_zk_systemd_dest: /etc/systemd/system/kafka_zk.service
 # zookeeper.properties
-kafka_zk_start:    "{{kafka_zk_home}}/bin/zookeeper-server-start.sh {{kafka_zk_home}}/config/zookeeper.properties"
-kafka_zk_datadir: /var/lib/kafka_zk
-kafka_zk_logdir:  /var/log/kafka_zk
-kafka_zk_src:     kafka/zookeeper.properties.j2
-kafka_zk_dest:    "{{kafka_home}}/config/zookeeper.properties"
+kafka_zk_start:     "{{kafka_zk_home}}/bin/zookeeper-server-start.sh {{kafka_zk_home}}/config/zookeeper.properties"
+kafka_zk_datadir:   "{{remote_lib}}/kafka_zk"
+kafka_zk_logdir:    "{{remote_log}}/kafka_zk"
+kafka_zk_src:       kafka/zookeeper.properties.j2
+kafka_zk_dest:      "{{kafka_home}}/config/zookeeper.properties"
 kafka_zk__dataDir:    "{{kafka_zk_datadir}}"
 kafka_zk__dataLogDir: "{{kafka_zk_logdir}}"
 ##

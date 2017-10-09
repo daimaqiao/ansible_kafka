@@ -38,6 +38,7 @@ delete.topic.enable={{kafka_server__delete_topic_enable}}
 {% else -%}
 	listeners=PLAINTEXT://:{{kafka_port}}
 {% endif %}
+inter.broker.listener.name=
 
 # Hostname and port the broker will advertise to producers and consumers. If not set, 
 # it uses the value for "listeners" if configured.  Otherwise, it will use the value

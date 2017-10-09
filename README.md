@@ -6,4 +6,4 @@
  3. 通过脚本./list-hosts.sh查看远程服务器清单
  4. 通过脚本./run-playbook.sh执行ansible任务
 
-2017.9.14
+2017.9.19

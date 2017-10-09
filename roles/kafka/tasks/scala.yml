@@ -1,4 +1,10 @@
 --- # scala.yml
+- name: initialize {{remote_lib}}
+  file: path={{remote_lib}} state=directory
+  tags: scala
+- name: initialize {{remote_log}}
+  file: path={{remote_lib}} state=directory
+  tags: scala
 - name: initialize {{remote_local}}
   file: path={{remote_local}} state=directory
   tags: scala

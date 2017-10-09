@@ -1,4 +1,10 @@
 --- # kafka.yml
+- name: initialize {{remote_lib}}
+  file: path={{remote_lib}} state=directory
+  tags: kafka
+- name: initialize {{remote_log}}
+  file: path={{remote_lib}} state=directory
+  tags: kafka
 - name: initialize {{remote_local}}
   file: path={{remote_local}} state=directory
   tags: kafka
@@ -63,7 +69,7 @@
   command: mv {{kafka_server_dest}} {{kafka_server_dest}}.backup creates={{kafka_server_dest}}.backup
   tags: kafka
 - name: update {{kafka_server_dest}}
-  template: src={{kafka_server_src}} dest={{kafka_server_dest}}
+  template: src={{kafka_server_src}} dest={{kafka_server_dest}} owner={{kafka_user}} group={{kafka_group}}
   tags: kafka
   notify:
   - restart kafka
@@ -72,7 +78,7 @@
   command: mv {{kafka_log4j_dest}} {{kafka_log4j_dest}}.backup creates={{kafka_log4j_dest}}.backup
   tags: kafka
 - name: update {{kafka_log4j_dest}}
-  template: src={{kafka_log4j_src}} dest={{kafka_log4j_dest}}
+  template: src={{kafka_log4j_src}} dest={{kafka_log4j_dest}} owner={{kafka_user}} group={{kafka_group}}
   tags: kafka
   notify:
   - restart kafka
@@ -95,19 +101,19 @@
 
 # other scripts
 - name: update {{kafka_be_consumer_dest}}
-  template: src={{kafka_be_consumer_src}} dest={{kafka_be_consumer_dest}} mode=755
+  template: src={{kafka_be_consumer_src}} dest={{kafka_be_consumer_dest}} mode=755 owner={{kafka_user}} group={{kafka_group}}
   tags: kafka
 - name: update {{kafka_be_producer_dest}}
-  template: src={{kafka_be_producer_src}} dest={{kafka_be_producer_dest}} mode=755
+  template: src={{kafka_be_producer_src}} dest={{kafka_be_producer_dest}} mode=755 owner={{kafka_user}} group={{kafka_group}}
   tags: kafka
 - name: update {{kafka_create_topic_dest}}
-  template: src={{kafka_create_topic_src}} dest={{kafka_create_topic_dest}} mode=755
+  template: src={{kafka_create_topic_src}} dest={{kafka_create_topic_dest}} mode=755 owner={{kafka_user}} group={{kafka_group}}
   tags: kafka
 - name: update {{kafka_delete_topic_dest}}
-  template: src={{kafka_delete_topic_src}} dest={{kafka_delete_topic_dest}} mode=755
+  template: src={{kafka_delete_topic_src}} dest={{kafka_delete_topic_dest}} mode=755 owner={{kafka_user}} group={{kafka_group}}
   tags: kafka
 - name: update {{kafka_show_topics_dest}}
-  template: src={{kafka_show_topics_src}} dest={{kafka_show_topics_dest}} mode=755
+  template: src={{kafka_show_topics_src}} dest={{kafka_show_topics_dest}} mode=755 owner={{kafka_user}} group={{kafka_group}}
   tags: kafka
 
 
@@ -128,7 +134,7 @@
   when: kafka_zk_enable
   tags: kafka_zk
 - name: update {{kafka_zk_dest}}
-  template: src={{kafka_zk_src}} dest={{kafka_zk_dest}}
+  template: src={{kafka_zk_src}} dest={{kafka_zk_dest}} owner={{kafka_user}} group={{kafka_group}}
   when: kafka_zk_enable
   tags: kafka_zk
   notify:
